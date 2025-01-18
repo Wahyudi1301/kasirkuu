@@ -19,9 +19,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/dashboard': (context) => DashboardPage(
-              phoneNumber: ModalRoute.of(context)!.settings.arguments as String,
-            ), // Pastikan ini ada
+        '/dashboard': (context) => const DashboardPage(), // Pastikan ini ada
       },
     );
   }

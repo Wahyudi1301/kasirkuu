@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  // Proses login
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -42,7 +41,6 @@ class _LoginPageState extends State<LoginPage> {
         password: _passwordController.text,
       );
 
-      // Login menggunakan presenter
       final result = await _presenter.login(loginData);
 
       setState(() {
@@ -51,12 +49,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (result == null) {
         // Navigasi ke dashboard jika login berhasil
-        Navigator.pushNamed(
-          context,
-          '/dashboard',
-          arguments:
-              loginData.phoneNumber, // Kirim phoneNumber sebagai arguments
-        );
+        Navigator.pushNamed(context, '/dashboard');
       } else {
         // Tampilkan pesan error
         ScaffoldMessenger.of(context).showSnackBar(
