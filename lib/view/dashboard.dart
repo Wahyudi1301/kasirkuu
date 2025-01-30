@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../presenter/dashboard_presenter.dart';
 import '../navigation/app_navigation.dart'; // Impor navigasi
+import '../view/login.dart'; // Pastikan ini mengarah ke halaman login
 
 class DashboardPage extends StatefulWidget {
   final String phoneNumber;
@@ -45,32 +46,108 @@ class _DashboardPageState extends State<DashboardPage> {
     });
   }
 
+  void _logout(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
+
+  void _showLabaRugiDialog(
+      BuildContext context, String phoneNumber, int idStore) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: 200,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Pengeluaran dan Pemasukan",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildDialogMenuItem(context, Icons.money_off, "Pengeluaran",
+                      () {
+                    AppNavigation.navigateToPengeluaran(
+                        context, phoneNumber, idStore);
+                  }),
+                  _buildDialogMenuItem(context, Icons.attach_money, "Pemasukan",
+                      () {
+                    AppNavigation.navigateToPemasukan(
+                        context, phoneNumber, idStore);
+                  }),
+                  _buildDialogMenuItem(context, Icons.history, "Histori", () {
+                    AppNavigation.navigateToHistori(
+                        context, phoneNumber, idStore);
+                  }),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// **Membangun Menu Item dalam Modal Dialog**
+  Widget _buildDialogMenuItem(
+      BuildContext context, IconData icon, String title, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(icon, size: 40, color: Colors.purple),
+          const SizedBox(height: 8),
+          Text(title, style: const TextStyle(fontSize: 14)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Dashboard')),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-              ? Center(child: Text(_errorMessage!))
-              : _selectedIndex == 0
-                  ? _buildDashboardContent() // Tab Beranda
-                  : _buildAccountContent(), // Tab Akun
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Beranda',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: 'Akun',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.purple,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
+    return WillPopScope(
+      onWillPop: () async {
+        // Mencegah kembali ke halaman sebelumnya
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dashboard'),
+          automaticallyImplyLeading: false,
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null
+                ? Center(child: Text(_errorMessage!))
+                : _selectedIndex == 0
+                    ? _buildDashboardContent()
+                    : _buildAccountContent(),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Beranda',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: 'Akun',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.purple,
+          unselectedItemColor: Colors.grey,
+          onTap: _onItemTapped,
+        ),
       ),
     );
   }
@@ -78,6 +155,11 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildDashboardContent() {
     // Filter menu berdasarkan status user
     final String userStatus = _dashboardData!['user_status'];
+    final String phoneNumber =
+        _dashboardData!['user_phone_number']; // ✅ Ambil phone_number
+    final int idStore = int.parse(_dashboardData!['id_store']);
+    // ✅ Ambil id_store
+
     final List<Map<String, dynamic>> menuItems = userStatus == 'admin'
         ? [
             {
@@ -88,12 +170,14 @@ class _DashboardPageState extends State<DashboardPage> {
             {
               'icon': Icons.history,
               'label': 'History Order',
-              'action': () => AppNavigation.navigateToHistory(context)
+              'action': () => AppNavigation.navigateToRiwayatTransaksi(
+                  context, phoneNumber) // ✅ Kirim phoneNumber
             },
             {
               'icon': Icons.bar_chart,
               'label': 'Laba Rugi',
-              'action': () => AppNavigation.navigateToProfit(context)
+              'action': () => _showLabaRugiDialog(
+                  context, phoneNumber, idStore) // ✅ Ubah ke modal pop-up
             },
             {
               'icon': Icons.group_add,
@@ -105,6 +189,11 @@ class _DashboardPageState extends State<DashboardPage> {
               'label': 'Tambah Produk',
               'action': () => AppNavigation.navigateToAddProduct(context)
             },
+            {
+              'icon': Icons.inventory, // ✅ Ikon untuk stok
+              'label': 'Kelola Stok', // ✅ Label untuk stok
+              'action': () => AppNavigation.navigateToStock(context)
+            },
           ]
         : [
             {
@@ -115,7 +204,8 @@ class _DashboardPageState extends State<DashboardPage> {
             {
               'icon': Icons.history,
               'label': 'History Order',
-              'action': () => AppNavigation.navigateToHistory(context)
+              'action': () => AppNavigation.navigateToRiwayatTransaksi(
+                  context, phoneNumber) // ✅ Kirim phoneNumber
             },
           ];
 
@@ -179,7 +269,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue),
+                      color: Colors.green),
                 ),
               ],
             ),
@@ -246,9 +336,24 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildAccountContent() {
     return Center(
-      child: Text(
-        'Hai, ${_dashboardData!['user_full_name']}! Ini adalah halaman Akun Anda.',
-        style: const TextStyle(fontSize: 16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Hai, ${_dashboardData!['user_full_name']}! Ini adalah halaman Akun Anda.',
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () => _logout(context),
+            icon: const Icon(Icons.exit_to_app),
+            label: const Text('Logout'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -261,11 +366,7 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Icon(icon, size: 40, color: Colors.blue),
           const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14),
-          ),
+          Text(label, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );

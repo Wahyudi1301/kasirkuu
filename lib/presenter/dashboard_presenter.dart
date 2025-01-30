@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class DashboardPresenter {
-  final String apiUrl =
-      'http://localhost/kasirku/app/dashboard.php'; // Ganti dengan URL API Anda
+  final String apiUrl = 'http://localhost/kasirku/app/dashboard.php';
 
   Future<Map<String, dynamic>?> fetchDashboardData(String phoneNumber) async {
     try {
@@ -19,7 +18,19 @@ class DashboardPresenter {
         final responseData = jsonDecode(response.body);
 
         if (responseData['status'] == 'success') {
-          return responseData['data'];
+          return {
+            "user_full_name": responseData['data']['user_full_name'],
+            "user_phone_number": responseData['data']['user_phone_number'],
+            "user_status": responseData['data']['user_status'],
+            "id_store": responseData['data']
+                ['id_store'], // ✅ Tambahkan `id_store`
+            "store_name": responseData['data']['store_name'],
+            "store_address": responseData['data']['store_address'],
+            "store_phone": responseData['data']['store_phone'],
+            "total_sales": double.tryParse(
+                    responseData['data']['total_sales'].toString()) ??
+                0.0,
+          };
         } else {
           throw Exception(responseData['message']);
         }

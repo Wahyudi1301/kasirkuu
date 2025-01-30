@@ -31,7 +31,15 @@ class UserPresenter {
   }
 
   // Menambahkan pengguna baru
-  Future<bool> addUser(String name, String phone, String imageUrl) async {
+  Future<bool> addUser({
+    required String name,
+    required String phone,
+    required String email,
+    required String address,
+    required String status,
+    required String password,
+    required String loggedInPhone,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -39,8 +47,65 @@ class UserPresenter {
         body: jsonEncode({
           'name': name,
           'phone': phone,
-          'image': imageUrl,
+          'email': email,
+          'address': address,
+          'status': status,
+          'password': password,
+          'logged_in_phone': loggedInPhone,
         }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 'success') {
+          return true;
+        } else {
+          throw Exception(responseData['message']);
+        }
+      } else {
+        throw Exception('Error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      return false;
+    }
+  }
+
+  // Mengupdate pengguna
+  Future<bool> updateUser(Map<String, dynamic> updatedData) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://localhost/kasirku/app/users.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(updatedData),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        if (responseData['status'] == 'success') {
+          return true;
+        } else {
+          print("Error: ${responseData['message']}");
+          return false;
+        }
+      } else {
+        print("Error: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print('Exception: $e');
+      return false;
+    }
+  }
+
+  // Menghapus pengguna
+  Future<bool> deleteUser(String phone) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$apiUrl?phone=$phone'),
+        headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 200) {
