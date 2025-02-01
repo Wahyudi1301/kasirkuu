@@ -149,16 +149,18 @@ class _DashboardPageState extends State<DashboardPage> {
           onTap: _onItemTapped,
         ),
       ),
-    );
+   );
   }
-
   Widget _buildDashboardContent() {
     // Filter menu berdasarkan status user
     final String userStatus = _dashboardData!['user_status'];
     final String phoneNumber =
         _dashboardData!['user_phone_number']; // ✅ Ambil phone_number
-    final int idStore = int.parse(_dashboardData!['id_store']);
+
     // ✅ Ambil id_store
+final int idStore = (_dashboardData!['id_store'] is int) 
+    ? _dashboardData!['id_store'] 
+    : int.parse(_dashboardData!['id_store'].toString());
 
     final List<Map<String, dynamic>> menuItems = userStatus == 'admin'
         ? [
@@ -188,11 +190,6 @@ class _DashboardPageState extends State<DashboardPage> {
               'icon': Icons.add_box,
               'label': 'Tambah Produk',
               'action': () => AppNavigation.navigateToAddProduct(context)
-            },
-            {
-              'icon': Icons.inventory, // ✅ Ikon untuk stok
-              'label': 'Kelola Stok', // ✅ Label untuk stok
-              'action': () => AppNavigation.navigateToStock(context)
             },
           ]
         : [

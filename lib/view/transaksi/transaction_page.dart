@@ -78,13 +78,6 @@ class _TransactionPageState extends State<TransactionPage> {
                   ),
                   title: Text(product.nameProduct),
                   subtitle: Text("Rp. ${product.hargaJual}"),
-                  trailing: Text(
-                    "Stok: ${product.stok}",
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green),
-                  ),
                   onTap: () => _selectProduct(product),
                 );
               },

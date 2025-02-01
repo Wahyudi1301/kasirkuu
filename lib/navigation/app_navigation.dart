@@ -7,7 +7,6 @@ import '../view/profit/histori_page.dart';
 import '../view/staff/add_staff.dart';
 import '../view/produk/add_product.dart';
 import '../view/dashboard.dart';
-import '../view/stok/stok_page.dart'; // ✅ Import halaman Kelola Stok
 
 class AppNavigation {
   // 🔹 Navigasi ke halaman transaksi
@@ -77,15 +76,6 @@ class AppNavigation {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AddProductPage()),
-    );
-  }
-
-  // 🔹 Navigasi ke halaman Kelola Stok
-  static void navigateToStock(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => const StockPage()), // ✅ Arahkan ke StockPage
     );
   }
 
